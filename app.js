@@ -199,3 +199,29 @@ app.put(
     response.send("District Details Updated");
   }
 );
+
+app.get(
+  "/states/:stateId/stats/",
+  authenticateToken,
+  async (request, response) => {
+    const { stateId } = request.params;
+    const getStateStatsQuery = `
+    SELECT
+      SUM(cases),
+      SUM(cured),
+      SUM(active),
+      SUM(deaths)
+    FROM
+      district
+    WHERE
+      state_id=${stateId};`;
+    const stats = await db.get(getStateStatsQuery);
+    response.send({
+      totalCases: stats["SUM(cases)"],
+      totalCured: stats["SUM(cured)"],
+      totalActive: stats["SUM(active)"],
+      totalDeaths: stats["SUM(deaths)"],
+    });
+  }
+);
+
